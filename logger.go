@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 // LogLevel 日志级别
@@ -23,20 +23,6 @@ var (
 	currentLogLevel = INFO
 	// 调试模式
 	debugMode = false
-)
-
-// Logger 自定义日志结构
-type Logger struct {
-	level LogLevel
-	*log.Logger
-}
-
-var (
-	traceLogger = &Logger{TRACE, log.New(os.Stdout, "[TRACE] ", log.LstdFlags)}
-	debugLogger = &Logger{DEBUG, log.New(os.Stdout, "[DEBUG] ", log.LstdFlags)}
-	infoLogger  = &Logger{INFO, log.New(os.Stdout, "[INFO] ", log.LstdFlags)}
-	warnLogger  = &Logger{WARN, log.New(os.Stdout, "[WARN] ", log.LstdFlags)}
-	errorLogger = &Logger{ERROR, log.New(os.Stdout, "[ERROR] ", log.LstdFlags)}
 )
 
 // SetLogLevel 设置日志级别
@@ -72,55 +58,52 @@ func IsDebugMode() bool {
 	return debugMode
 }
 
-func (l *Logger) log(format string, v ...interface{}) {
-	if l.level >= currentLogLevel {
-		if len(v) == 0 {
-			l.Println(format)
-		} else {
-			l.Printf(format, v...)
-		}
-	}
-}
-
 // Trace 跟踪日志
 func Trace(format string, v ...interface{}) {
-	if debugMode || currentLogLevel <= TRACE {
-		traceLogger.log(format, v...)
+	if currentLogLevel <= TRACE {
+		printLog("TRACE", format, v...)
 	}
 }
 
 // Debug 调试日志
 func Debug(format string, v ...interface{}) {
-	if debugMode || currentLogLevel <= DEBUG {
-		debugLogger.log(format, v...)
+	if currentLogLevel <= DEBUG {
+		printLog("DEBUG", format, v...)
 	}
 }
 
 // Info 信息日志
 func Info(format string, v ...interface{}) {
 	if currentLogLevel <= INFO {
-		infoLogger.log(format, v...)
+		printLog("INFO", format, v...)
 	}
 }
 
 // Warn 警告日志
 func Warn(format string, v ...interface{}) {
 	if currentLogLevel <= WARN {
-		warnLogger.log(format, v...)
+		printLog("WARN", format, v...)
 	}
 }
 
 // Error 错误日志
 func Error(format string, v ...interface{}) {
 	if currentLogLevel <= ERROR {
-		errorLogger.log(format, v...)
+		printLog("ERROR", format, v...)
 	}
 }
 
 // Fatal 致命错误日志
 func Fatal(format string, v ...interface{}) {
-	errorLogger.log(format, v...)
+	printLog("FATAL", format, v...)
 	fmt.Println("\n按回车键退出...")
 	fmt.Scanln()
 	os.Exit(1)
+}
+
+// printLog 内部日志打印函数
+func printLog(level string, format string, v ...interface{}) {
+	timestamp := time.Now().Format("2006/01/02 15:04:05")
+	message := fmt.Sprintf(format, v...)
+	fmt.Printf("[%s] %s %s\n", level, timestamp, message)
 }

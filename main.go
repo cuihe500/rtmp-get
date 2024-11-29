@@ -104,24 +104,22 @@ func listInterfaces() {
 		Fatal("获取网络接口列表失败: %v", err)
 	}
 
-	if IsDebugMode() {
-		Debug("可用网络接口列表:")
-		for _, device := range devices {
-			Debug("----------------------------------------")
-			Debug("接口名称: %s", device.Name)
-			Debug("接口描述: %s", device.Description)
-			if len(device.Addresses) > 0 {
-				Debug("IP地址列表:")
-				for _, address := range device.Addresses {
-					Debug("  - IP地址: %s", address.IP)
-					Debug("    子网掩码: %s", address.Netmask)
-					if address.Broadaddr != nil {
-						Debug("    广播地址: %s", address.Broadaddr)
-					}
+	Debug("可用网络接口列表:")
+	for _, device := range devices {
+		Debug("----------------------------------------")
+		Debug("接口名称: %s", device.Name)
+		Debug("接口描述: %s", device.Description)
+		if len(device.Addresses) > 0 {
+			Debug("IP地址列表:")
+			for _, address := range device.Addresses {
+				Debug("  - IP地址: %s", address.IP)
+				Debug("    子网掩码: %s", address.Netmask)
+				if address.Broadaddr != nil {
+					Debug("    广播地址: %s", address.Broadaddr)
 				}
 			}
-			Debug("----------------------------------------")
 		}
+		Debug("----------------------------------------")
 	}
 }
 
@@ -131,16 +129,13 @@ func main() {
 	logLevel := flag.String("log-level", "INFO", "日志级别 (TRACE/DEBUG/INFO/WARN/ERROR)")
 	flag.Parse()
 
-	// 设置日志级别和调试模式
-	SetDebugMode(*debug)
+	// 先设置日志级别，再设置调试模式
 	SetLogLevel(*logLevel)
-
-	// 添加测试输出
-	Debug("测试调试输出")
-	Info("测试信息输出")
+	SetDebugMode(*debug)
 
 	Info("程序启动...")
-	Debug("调试模式已启用")
+	Debug("调试模式状态: %v", IsDebugMode())
+	Debug("当前日志级别: %s", *logLevel)
 
 	// 确保 Npcap 已安装
 	if err := checkNpcapDependency(); err != nil {
